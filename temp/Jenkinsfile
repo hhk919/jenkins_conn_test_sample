@@ -7,9 +7,9 @@ pipeline {
     }
 
     environment {
-      AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId')
-      AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey')
-      AWS_DEFAULT_REGION = 'ap-northeast-2'
+      // AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId')
+      // AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey')
+      // AWS_DEFAULT_REGION = 'ap-northeast-2'
       HOME = '.' // Avoid npm root owned
     }
 
@@ -21,9 +21,9 @@ pipeline {
             steps {
                 echo 'Clonning Repository'
 
-                git url: 'https://github.com/frontalnh/temp.git',
-                    branch: 'master',
-                    credentialsId: 'jenkinsgit'
+                git url: 'https://github.com/hhk919/temp.git',
+                    branch: 'main',
+                    credentialsId: 'jenkins_conn_test'
             }
 
             post {
@@ -47,12 +47,12 @@ pipeline {
         stage('Deploy Frontend') {
           steps {
             echo 'Deploying Frontend'
-            // 프론트엔드 디렉토리의 정적파일들을 S3 에 올림, 이 전에 반드시 EC2 instance profile 을 등록해야함.
-            dir ('./website'){
-                sh '''
-                aws s3 sync ./ s3://namhoontest
-                '''
-            }
+          //   // 프론트엔드 디렉토리의 정적파일들을 S3 에 올림, 이 전에 반드시 EC2 instance profile 을 등록해야함.
+          //   dir ('./website'){
+          //       sh '''
+          //       aws s3 sync ./ s3://namhoontest
+          //       '''
+          //   }
           }
 
           post {
@@ -61,7 +61,7 @@ pipeline {
               success {
                   echo 'Successfully Cloned Repository'
 
-                  mail  to: 'frontalnh@gmail.com',
+                  mail  to: 'hankyoul0919@gmail.com',
                         subject: "Deploy Frontend Success",
                         body: "Successfully deployed frontend!"
 
@@ -70,7 +70,7 @@ pipeline {
               failure {
                   echo 'I failed :('
 
-                  mail  to: 'frontalnh@gmail.com',
+                  mail  to: 'hankyoul0919@gmail.com',
                         subject: "Failed Pipelinee",
                         body: "Something is wrong with deploy frontend"
               }
@@ -78,13 +78,12 @@ pipeline {
         }
         
         stage('Lint Backend') {
-            // Docker plugin and Docker Pipeline 두개를 깔아야 사용가능!
-            agent {
-              docker {
-                image 'node:latest'
-              }
-            }
-            
+        //     // Docker plugin and Docker Pipeline 두개를 깔아야 사용가능!
+        //     agent {
+        //       docker {
+        //         image 'node:latest'
+        //       }
+        //     }
             steps {
               dir ('./server'){
                   sh '''
@@ -96,11 +95,11 @@ pipeline {
         }
         
         stage('Test Backend') {
-          agent {
-            docker {
-              image 'node:latest'
-            }
-          }
+          // agent {
+          //   docker {
+          //     image 'node:latest'
+          //   }
+          // }
           steps {
             echo 'Test Backend'
 
@@ -118,11 +117,11 @@ pipeline {
           steps {
             echo 'Build Backend'
 
-            dir ('./server'){
-                sh """
-                docker build . -t server --build-arg env=${PROD}
-                """
-            }
+            // dir ('./server'){
+            //     sh """
+            //     docker build . -t server --build-arg env=${PROD}
+            //     """
+            // }
           }
 
           post {
@@ -138,12 +137,12 @@ pipeline {
           steps {
             echo 'Build Backend'
 
-            dir ('./server'){
-                sh '''
-                docker rm -f $(docker ps -aq)
-                docker run -p 80:80 -d server
-                '''
-            }
+            // dir ('./server'){
+            //     sh '''
+            //     docker rm -f $(docker ps -aq)
+            //     docker run -p 80:80 -d server
+            //     '''
+            // }
           }
 
           post {
